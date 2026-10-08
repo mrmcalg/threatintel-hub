@@ -1,0 +1,93 @@
+# config/sources.yaml
+version: 2
+
+defaults:
+  timeout_segundos: 20
+  max_bytes: 5242880          # 5 MB por respuesta
+  reintentos: 3
+  user_agent: "ThreatIntelHub/2.0 (+contacto-soc@ejemplo.org)"
+  respetar_robots_txt: true
+
+fuentes:
+  - id: "cisa_kev_api"
+    nombre: "CISA Known Exploited Vulnerabilities"
+    tipo: "api"
+    url: "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json"
+    activo: true
+    categoria: "oficial_gobierno"
+    frecuencia_minutos: 60
+    rol: ["fuente", "enriquecedor"]
+    fiabilidad: "alta"
+
+  - id: "zdi_0day_feed"
+    nombre: "Zero Day Initiative Blog"
+    tipo: "rss"
+    url: "https://www.zerodayinitiative.com/blog?format=rss"
+    activo: true
+    categoria: "investigacion_0day"
+    frecuencia_minutos: 30
+    fiabilidad: "alta"
+
+  - id: "project_zero_rss"
+    nombre: "Google Project Zero"
+    tipo: "rss"
+    url: "https://googleprojectzero.blogspot.com/feeds/posts/default?alt=rss"
+    activo: true
+    categoria: "investigacion_0day"
+    frecuencia_minutos: 60
+    fiabilidad: "alta"
+
+  - id: "bleeping_computer_news"
+    nombre: "BleepingComputer News"
+    tipo: "rss"
+    url: "https://www.bleepingcomputer.com/feed/"
+    activo: true
+    categoria: "noticias_soc"
+    frecuencia_minutos: 30
+    fiabilidad: "media"
+
+  - id: "the_hacker_news"
+    nombre: "The Hacker News"
+    tipo: "rss"
+    url: "https://feeds.feedburner.com/TheHackersNews"
+    activo: true
+    categoria: "noticias_soc"
+    frecuencia_minutos: 30
+    fiabilidad: "media"
+
+  # Ejemplo de fuente web (sin feed). Las URLs concretas deben validarse
+  # antes de activar: v1 nombraba Talos y Mandiant pero no incluía ninguna entrada.
+  - id: "ejemplo_web_advisory"
+    nombre: "Ejemplo: portal de avisos sin RSS"
+    tipo: "web"
+    url: "https://ejemplo.org/advisories/"
+    activo: false
+    categoria: "avisos_fabricante"
+    frecuencia_minutos: 120
+    fiabilidad: "alta"
+    web:
+      modo: "listado"            # listado -> enlaces a artículos -> extracción
+      patron_enlaces: "/advisories/[a-z0-9-]+"
+      render_js: false           # true requiere Playwright
+
+enriquecedores:
+  - id: "epss"
+    nombre: "FIRST EPSS"
+    url_api: "https://api.first.org/data/v1/epss"
+    modo: "api_por_cve"          # alternativa: descarga masiva diaria
+    cache_horas: 24
+    activo: true
+
+  - id: "nvd"
+    nombre: "NIST NVD 2.0"
+    url_api: "https://services.nvd.nist.gov/rest/json/cves/2.0"
+    cache_horas: 24
+    requiere_api_key: true       # clave por variable de entorno NVD_API_KEY
+    activo: true
+
+  - id: "github_poc"
+    nombre: "GitHub PoC search"
+    url_api: "https://api.github.com/search/repositories"
+    cache_horas: 12
+    requiere_api_key: true       # token por variable de entorno GITHUB_TOKEN
+    activo: true

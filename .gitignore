@@ -6,3 +6,5 @@ __pycache__/
 storage/database.sqlite
 storage/raw_inputs/
 storage/generated_reports/
+tests/fixtures/*.xml
+tests/fixtures/*.json

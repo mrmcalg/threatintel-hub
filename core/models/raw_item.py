@@ -18,7 +18,7 @@ class RawItem(BaseModel):
     texto: str
     hash_contenido: str
     metodo_extraccion: Literal[
-        "feed_summary", "feed_content", "trafilatura", "playwright+trafilatura"
+        "feed_summary", "feed_content", "trafilatura", "playwright+trafilatura", "api_json"
     ]
     calidad_extraccion: Literal["completa", "parcial", "solo_resumen"]
     estado: Literal["nuevo", "actualizado", "duplicado"]

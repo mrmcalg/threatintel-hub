@@ -1,0 +1,8 @@
+.venv/
+__pycache__/
+.pytest_cache/
+*.pyc
+.env
+storage/database.sqlite
+storage/raw_inputs/
+storage/generated_reports/

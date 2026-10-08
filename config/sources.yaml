@@ -31,7 +31,7 @@ fuentes:
   - id: "project_zero_rss"
     nombre: "Google Project Zero"
     tipo: "rss"
-    url: "https://googleprojectzero.blogspot.com/feeds/posts/default?alt=rss"
+    url: "https://googleprojectzero.blogspot.com/feeds/posts/summary?alt=rss"
     activo: true
     categoria: "investigacion_0day"
     frecuencia_minutos: 60

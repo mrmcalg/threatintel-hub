@@ -174,6 +174,22 @@ class ItemStore:
             ).fetchone()
         return fila["n"]
 
+    def existe_url(self, fuente_id: str, url_canonica: str) -> bool:
+        """True si la fuente ya tiene guardada esa URL canónica."""
+        fila = self._conn.execute(
+            "SELECT 1 FROM items WHERE fuente_id = ? AND url_canonica = ? LIMIT 1",
+            (fuente_id, url_canonica),
+        ).fetchone()
+        return fila is not None
+
+    def listar_items(self, fuente_id: str, limite: int = 10) -> list[RawItem]:
+        """Los últimos ítems insertados de una fuente (para inspección)."""
+        filas = self._conn.execute(
+            "SELECT datos_json FROM items WHERE fuente_id = ? ORDER BY rowid DESC LIMIT ?",
+            (fuente_id, limite),
+        ).fetchall()
+        return [RawItem.model_validate_json(f["datos_json"]) for f in filas]
+
     # ------------------------------------------------------------- ejecuciones
     def registrar_ejecucion(
         self,

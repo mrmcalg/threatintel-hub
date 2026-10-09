@@ -15,8 +15,8 @@ Alcance actual (lo que NO hace todavía):
   (documento v2, sección 4.2) llegará con config_sync.py.
 - No hay circuit breaker: se cuentan los fallos consecutivos (health.py los
   usará), pero ninguna fuente se bloquea.
-- Las fuentes de tipo `web` se omiten: aún no hay colector.
-- No consulta robots.txt y no limita la concurrencia por dominio.
+- robots.txt solo lo consulta el colector web; RSS y API no lo hacen.
+- No limita la concurrencia por dominio.
 - Toda fuente de tipo `api` se procesa con KevCollector, que solo conoce el
   formato del catálogo CISA KEV.
 """
@@ -36,11 +36,16 @@ from core.ingestion.base import BaseCollector, ErrorColector, Validadores
 from core.ingestion.dedup import ItemStore
 from core.ingestion.http_client import ErrorDescarga, ErrorHttp, HttpClient
 from core.ingestion.rss_collector import RssCollector
+from core.ingestion.web_collector import WebCollector
 from core.models.source_config import ConfigError, Fuente, SourcesFile, load_sources
 
 log = logging.getLogger("ingesta")
 
-COLECTORES: dict[str, type[BaseCollector]] = {"rss": RssCollector, "api": KevCollector}
+COLECTORES: dict[str, type[BaseCollector]] = {
+    "rss": RssCollector,
+    "api": KevCollector,
+    "web": WebCollector,
+}
 
 
 @dataclass
@@ -102,7 +107,14 @@ class IngestionRunner:
         http_status: Optional[int] = None
         try:
             estado = self._store.obtener_estado_fuente(fuente.id)
-            colector = clase(fuente, self._cliente, ahora=self._ahora)
+            extras = {"ya_visto": self._store.existe_url} if clase is WebCollector else {}
+            colector = clase(
+                fuente,
+                self._cliente,
+                ahora=self._ahora,
+                defaults=self._config.defaults,
+                **extras,
+            )
             resultado = await colector.recolectar(Validadores(estado.etag, estado.last_modified))
             http_status = resultado.status
             clasificados = self._store.registrar_lote(resultado.items)

@@ -242,13 +242,21 @@ async def test_fuente_inactiva_no_se_ejecuta(store):
     assert cliente.llamadas == []
 
 
-async def test_tipo_web_se_omite_sin_contar_como_fallo(store):
+async def test_fuente_web_consulta_robots_y_luego_el_listado(store):
+    url_robots = "https://ejemplo.com/robots.txt"
+    listado = b"<html><body><p>sin enlaces</p></body></html>"
     config = hacer_config(definir_fuente("sitio_web", tipo="web"))
-    cliente = ClienteGuion({})
+    cliente = ClienteGuion(
+        {
+            url_robots: [ErrorHttp(404, url_robots)],
+            url_de("sitio_web"): [ok(listado, "sitio_web")],
+        }
+    )
     r = (await IngestionRunner(config, store, cliente).ejecutar())[0]
-    assert r.resultado == "omitida"
-    assert cliente.llamadas == []
-    assert store.obtener_estado_fuente("sitio_web").fallos_consecutivos == 0
+    assert r.resultado == "ok"
+    assert r.nuevos == 0
+    assert any("patron_enlaces" in a for a in r.advertencias)
+    assert [u for u, _, _ in cliente.llamadas] == [url_robots, url_de("sitio_web")]
 
 
 async def test_solo_filtra_las_fuentes_y_rechaza_ids_desconocidos(store):

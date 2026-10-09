@@ -12,7 +12,7 @@ from typing import Callable, ClassVar, Optional
 
 from core.ingestion.http_client import HttpClient, Respuesta
 from core.models.raw_item import RawItem
-from core.models.source_config import Fuente
+from core.models.source_config import Defaults, Fuente
 
 
 class ErrorColector(Exception):
@@ -57,6 +57,7 @@ class BaseCollector(ABC):
         cliente: HttpClient,
         *,
         ahora: Optional[Callable[[], datetime]] = None,
+        defaults: Optional[Defaults] = None,
     ):
         if fuente.tipo != self.tipo:
             raise ValueError(
@@ -65,6 +66,7 @@ class BaseCollector(ABC):
             )
         self._fuente = fuente
         self._cliente = cliente
+        self._defaults = defaults
         self._ahora = ahora or (lambda: datetime.now(timezone.utc))
 
     async def _descargar(self, validadores: Optional[Validadores]) -> Respuesta:

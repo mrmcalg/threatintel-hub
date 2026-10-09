@@ -28,3 +28,9 @@ URL_DETALLE_CVE = "https://nvd.nist.gov/vuln/detail/{cve}"
 # Límite global de fuentes en paralelo. El documento (4.6) pide también un
 # límite por dominio: aún no está implementado.
 MAX_FUENTES_CONCURRENTES = 5
+
+# Colector web (usado por core/ingestion/web_collector.py)
+# Valores iniciales propuestos por mí; el documento v2 no fija estos números.
+MAX_ARTICULOS_POR_EJECUCION = 30
+PAUSA_ENTRE_ARTICULOS_SEGUNDOS = 1.0
+MIN_CARACTERES_TEXTO_COMPLETO = 500  # por debajo, calidad_extraccion = "parcial"
